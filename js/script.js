@@ -1,12 +1,16 @@
 const url = "https://jsonplaceholder.typicode.com/posts"
 
+//index
 const loadingElement = document.querySelector("#loading")
 const postsContainer = document.querySelector("#posts-container")
-
+//post
 const postPage = document.querySelector("#post");
 const postContainer = document.querySelector("#post-container");
 const commentsConteiner = document.querySelector("#comments-container");
-
+//comment form
+const commentForm = document.querySelector("#comment-form");
+const emailInput = document.querySelector("#email");
+const bodyInput = document.querySelector("#body");
 
 // Get id from URL
 const urlSearchParams = new URLSearchParams(window.location.search);
@@ -33,7 +37,7 @@ async function getAllPosts() {
         title.innerText = post.title;
         body.innerText = post.body;
         link.innerText = "Ler";
-        link.setAttribute("href", `./post.html?id=${post.id}`);
+        link.setAttribute("href", `/post.html?id=${post.id}`);
 
         div.appendChild(title);
         div.appendChild(body);
@@ -70,7 +74,40 @@ async function getPost(id) {
 
     console.log(dataComments);
 
-    dataComments.map((comments) => { });
+    dataComments.map((comment) => {
+        createComment(comment);
+    });
+}
+ 
+function createComment(comment) {
+    const div = document.createElement("div");
+    const email = document.createElement("h3");
+    const commentBody = document.createElement("p");
+
+    email.innerText = comment.email;
+    commentBody.innerText = comment.body;
+
+    div.appendChild(email);
+    div.appendChild(commentBody);
+
+    commentsConteiner.appendChild(div);
+}
+
+
+//post a comment
+async function postComment(comment) {
+
+    const response = await fetch(`${url}/${postId}/comments`, {
+        method: "POST",
+        body: comment, 
+        headers: {
+            "content-type": "application/json",
+        },
+    });
+
+    const data = await response.json();
+
+    createComment(data);
 }
 
 if (!postId) {
@@ -78,3 +115,17 @@ if (!postId) {
 } else {
     getPost(postId);
 }
+
+//Add event to comment form
+commentForm.addEventListener("submit", (e) => {
+    e.preventDefault()
+
+    let comment = {
+        email: emailInput.value,
+        body: bodyInput.value,
+    }
+
+    comment = JSON.stringify(comment);
+
+    postComment(comment);
+ });
